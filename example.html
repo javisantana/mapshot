@@ -1,0 +1,44 @@
+
+<body>
+<script src="mapshot.js"></script>
+<script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.core.js"></script>
+<script>
+
+  // register cartodb
+  mapshot.register('cartodb', function(data, done) {
+    cartodb.Tiles.getTiles({
+      user_name: data.user_name,
+      sublayers: data.sublayers
+    }, function(data) {
+      done(data.tiles[0].replace('{s}', 1));
+    });
+  });
+
+  var m = mapshot.map({
+    center: [40, -4],
+    zoom: 4,
+    width: 700,
+    height: 300,
+    renderer_type: 'canvas',
+    layers: [
+      'http://tile.stamen.com/toner/{z}/{x}/{y}.png',
+      //'http://{s}.tiles.mapbox.com/v3/examples.map-vyofok3q/{z}/{x}/{y}.png',
+      {
+        type: 'cartodb',
+        user_name: 'examples',
+        sublayers: [{
+         sql: 'select * from ne_10m_populated_p_2',
+         cartocss: '#ne_10m_populated_p_2{ marker-fill: #F11810; marker-opacity: 0.9; marker-allow-overlap: true; marker-placement: point; marker-type: ellipse; marker-width: 7.5; marker-line-width: 2; marker-line-color: #000; marker-line-opacity: 0.2; }'
+        }]
+      }
+    ]
+  })
+
+  m.renderer()
+    .addPass('blur', { passes: 20, center:[40, -4], dist: 60})
+    .addPass('noise', 10)
+    .addPass('posterize', 35)
+  m.render();
+
+</script>
+</body>
